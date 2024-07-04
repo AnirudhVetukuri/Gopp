@@ -1,8 +1,8 @@
 #include "gopp/Context.h"
 #include <cassert>
-#include <csignal>  // For sigemptyset, sigaddset, SIGRTMIN, SIGUSR1
+#include <csignal>
 
-// Dummy implementations for scheduleNext and runTask
+// Placeholder implementations for scheduleNext and runTask
 void scheduleNext() {}
 void runTask() {}
 

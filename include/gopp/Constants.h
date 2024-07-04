@@ -5,7 +5,6 @@
 
 namespace gopp
 {
-// Constants and macros relevant for the concurrency runtime
 
 enum class ContextType : size_t
 {
@@ -14,14 +13,14 @@ enum class ContextType : size_t
     COUNT = 2
 };
 
-// Determine the maximum number of concurrent threads
+// Maximum number of concurrent threads
 #ifndef MAX_CONCURRENT_THREADS
     static const size_t MAX_THREADS = std::thread::hardware_concurrency();
 #else
     static const size_t MAX_THREADS = std::min(std::thread::hardware_concurrency(), std::max(1, MAX_CONCURRENT_THREADS));
 #endif
 
-// Define stack sizes for tasks and scheduler contexts
+// Stack sizes for tasks and scheduler contexts
 #ifndef TASK_STACK_SIZE
     static const size_t TASK_STACK = 4 * 1024 * 1024; // 4 MB
 #else

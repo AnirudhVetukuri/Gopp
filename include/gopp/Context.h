@@ -16,5 +16,6 @@ namespace gopp
 
         ucontext_t *getContext() { return &m_context; }
     };
+    
     using ExecutionContextPtr = std::unique_ptr<ExecutionContext>;
 }
