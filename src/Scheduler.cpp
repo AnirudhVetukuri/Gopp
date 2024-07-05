@@ -26,7 +26,7 @@ namespace gopp
         }
     }
 
-    void Scheduler::addTask(TaskPtr task)
+    void Scheduler::addTask(CoroutinePtr task)
     {
         {
             std::unique_lock<std::mutex> lock(m_queueMutex);
@@ -47,7 +47,7 @@ namespace gopp
     {
         while (true)
         {
-            TaskPtr task;
+            CoroutinePtr task;
             {
                 std::unique_lock<std::mutex> lock(m_queueMutex);
                 m_condition.wait(lock, [this] { return m_stop || !m_taskQueue.empty(); });
@@ -58,7 +58,14 @@ namespace gopp
                 task = std::move(m_taskQueue.front());
                 m_taskQueue.pop();
             }
-            task->execute();
+            if (task->state() == CoroutineState::READY || task->state() == CoroutineState::SUSPENDED)
+            {
+                task->resume();
+                if (!task->isFinished())
+                {
+                    addTask(std::move(task));
+                }
+            }
         }
     }
 }

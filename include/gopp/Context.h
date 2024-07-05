@@ -15,7 +15,7 @@ namespace gopp
         void initialize(const ContextType type, ExecutionContext *linkedContext = nullptr);
 
         ucontext_t *getContext() { return &m_context; }
+        std::vector<char>& getStack() { return m_stackMemory; }
     };
-    
     using ExecutionContextPtr = std::unique_ptr<ExecutionContext>;
 }

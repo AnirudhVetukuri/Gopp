@@ -3,14 +3,18 @@
 
 using namespace gopp;
 
-void sampleFunction1()
+void coroutineFunction1()
 {
-    std::cout << "Sample function 1 is executing." << std::endl;
+    std::cout << "Coroutine 1: Part 1" << std::endl;
+    Coroutine::current->yield();
+    std::cout << "Coroutine 1: Part 2" << std::endl;
 }
 
-void sampleFunction2()
+void coroutineFunction2()
 {
-    std::cout << "Sample function 2 is executing." << std::endl;
+    std::cout << "Coroutine 2: Part 1" << std::endl;
+    Coroutine::current->yield();
+    std::cout << "Coroutine 2: Part 2" << std::endl;
 }
 
 void test_scheduler()
@@ -18,15 +22,15 @@ void test_scheduler()
     const size_t numThreads = 4;
     Scheduler scheduler(numThreads);
 
-    auto task1 = std::make_unique<Task>(sampleFunction1);
-    auto task2 = std::make_unique<Task>(sampleFunction2);
+    auto coroutine1 = std::make_unique<Coroutine>(coroutineFunction1);
+    auto coroutine2 = std::make_unique<Coroutine>(coroutineFunction2);
 
-    scheduler.addTask(std::move(task1));
-    scheduler.addTask(std::move(task2));
+    scheduler.addTask(std::move(coroutine1));
+    scheduler.addTask(std::move(coroutine2));
 
     std::cout << "Running scheduler with " << numThreads << " threads..." << std::endl;
     scheduler.run();
-    std::this_thread::sleep_for(std::chrono::seconds(1)); // Wait for tasks to complete
+    std::this_thread::sleep_for(std::chrono::seconds(1));
     std::cout << "Scheduler run completed." << std::endl;
 }
 
