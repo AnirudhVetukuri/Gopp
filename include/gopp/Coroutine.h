@@ -1,38 +1,56 @@
 #pragma once
 #include <functional>
+#include <future>
 #include <memory>
-#include "Context.h"
+#include "Context.h" 
 
 namespace gopp
 {
-    enum class CoroutineState
+
+/*
+ * Coroutine encapsulates a task submitted by the user along with its execution contexts.
+ * It replaces the old cppgo Routine and serves as the new coroutine implementation.
+ */
+class Coroutine
+{
+    // Callable representing the coroutine task.
+    std::packaged_task<void()> m_task;
+    // Execution contexts for running the task and interfacing with the scheduler.
+    ExecutionContextPtr m_runContext;
+    ExecutionContextPtr m_schedulerContext;
+    // Indicates whether the task has finished execution.
+    bool m_done{false};
+
+public:
+    // Construct a Coroutine by moving in a packaged task.
+    explicit Coroutine(std::packaged_task<void()> task)
+        : m_task(std::move(task))
     {
-        READY,
-        RUNNING,
-        SUSPENDED,
-        FINISHED
-    };
+        // Context initialization can be performed here if needed.
+        // For example, one might allocate stacks or link contexts.
+    }
 
-    class Coroutine
+    // Disable copying and moving.
+    Coroutine(const Coroutine &) = delete;
+    Coroutine &operator=(const Coroutine &) = delete;
+    Coroutine(Coroutine &&) = delete;
+    Coroutine &operator=(Coroutine &&) = delete;
+
+    // Run the task if not already done.
+    void run()
     {
-        std::function<void()> m_function;
-        ExecutionContextPtr m_context;
-        ExecutionContextPtr m_caller_context;
-        CoroutineState m_state;
+        if (!m_done)
+        {
+            m_task();
+            m_done = true;
+        }
+    }
 
-        friend void coroutineFunctionWrapper();
+    bool done() const { return m_done; }
+    ExecutionContextPtr &runContext() { return m_runContext; }
+    ExecutionContextPtr &schedulerContext() { return m_schedulerContext; }
+};
 
-    public:
-        Coroutine(std::function<void()> function);
-        void resume();
-        static void yield();
+using CoroutinePtr = std::unique_ptr<Coroutine>;
 
-        CoroutineState state() const { return m_state; }
-        bool isFinished() const { return m_state == CoroutineState::FINISHED; }
-
-        static thread_local Coroutine* current;
-        static thread_local ExecutionContext* main_context;
-    };
-
-    using CoroutinePtr = std::unique_ptr<Coroutine>;
 }
